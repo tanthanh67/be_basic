@@ -4,14 +4,7 @@ import router from "./src/routes/index.js";
 
 const app = express();
 
-app.get("/", (req, res) => {
-  res.send("<a href='/about'>Hello</a>");
-});
-
-app.get("/about", (req, res) => {
-  res.send("Hello, I'm Tan");
-});
-
+app.use(express.json());
 app.use("/api", router);
 
 app.listen(3000, () => {
