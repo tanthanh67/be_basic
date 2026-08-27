@@ -1,76 +1,50 @@
 import * as userService from "../services/user.service.js";
+import catchAsync from "../utils/catchAsync.js";
+import { sendSuccess } from "../utils/responseHelper.js";
+import { NotFoundError } from "../core/error.response.js";
 
-export const getAllUser = async (req, res) => {
-  try {
-    const users = await userService.getAllUser();
+export const getAllUser = catchAsync(async (req, res) => {
+  const users = await userService.getAllUser();
 
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to read users data" });
-  }
-};
+  return sendSuccess(res, 200, "Users retrieved successfully", users);
+});
 
-export const getUserById = async (req, res) => {
+export const getUserById = catchAsync(async (req, res) => {
   const userId = req.params.id;
 
-  try {
-    const users = await userService.getAllUser();
-    const user = users.find((u) => u.id === parseInt(userId));
+  const users = await userService.getAllUser();
+  const user = users.find((u) => u.id === parseInt(userId));
 
-    if (user) {
-      res.status(200).json(user);
-    } else {
-      res.status(404).json({ error: "User not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: "Failed to read users data" });
+  if (user) {
+    return sendSuccess(res, 200, "User retrieved successfully", user);
+  } else {
+    throw new NotFoundError("User not found");
   }
-};
+});
 
-export const addUser = async (req, res) => {
-  try {
-    const newUser = await userService.addUser(req.body);
-    res.status(201).json({
-      message: "User added successfully",
-      user: newUser,
-    });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to add user" });
+export const addUser = catchAsync(async (req, res) => {
+  const newUser = await userService.addUser(req.body);
+  return sendSuccess(res, 201, "User added successfully", newUser);
+});
+
+export const updateUser = catchAsync(async (req, res) => {
+  const updatedUser = await userService.updateUser(req.params.id, req.body);
+
+  if (!updatedUser) {
+    throw new NotFoundError("User not found");
   }
-};
 
-export const updateUser = async (req, res) => {
-  try {
-    const updatedUser = await userService.updateUser(req.params.id, req.body);
+  return sendSuccess(res, 200, "User updated successfully", updatedUser);
+});
 
-    if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
-    }
+export const deleteUser = catchAsync(async (req, res) => {
+  const userIndex = req.params.id;
 
-    res.status(200).json({
-      message: "User updated successfully",
-      user: updatedUser,
-    });
-  } catch (err) {
-    res.status(500).json({ err: "Failed to update user" });
+  const deletedUser = await userService.deleteUser(userIndex);
+
+  if (!deletedUser) {
+    throw new NotFoundError("User not found");
   }
-};
 
-export const deleteUser = async (req, res) => {
-  try {
-    const userIndex = req.params.id;
-
-    const deletedUser = await userService.deleteUser(userIndex);
-
-    if (!deletedUser) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.status(200).json({
-      message: "User deleted successfully",
-      user: deletedUser,
-    });
-  } catch (err) {
-    res.status(500).json({ err: "Failed to delete user" });
-  }
-};
+  return sendSuccess(res, 200, "User deleted successfully", deletedUser);
+});
