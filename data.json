@@ -17,24 +17,6 @@
       "name": "Ta2n",
       "email": "tan@example.com",
       "age": 22
-    },
-    {
-      "name": "Tan3",
-      "email": "tan@example.com",
-      "age": 22,
-      "id": 4
-    },
-    {
-      "name": "Ta2n",
-      "email": "tan@example.com",
-      "age": 22,
-      "id": 5
-    },
-    {
-      "name": "Ta2n",
-      "email": "tan@example.com",
-      "age": 22,
-      "id": 6
     }
   ]
 }

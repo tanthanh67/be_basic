@@ -1,5 +1,6 @@
 import { readData } from "../repository/readData.js";
 import { writeData } from "../repository/writeData.js";
+import { ConflictError } from "../core/error.response.js";
 
 export const getAllUser = async () => {
   const data = await readData();
@@ -14,26 +15,26 @@ export const getUserById = async (userId) => {
 };
 
 export const addUser = async (userData) => {
-  try {
-    const data = await readData();
-    const nextId =
-      data.users.reduce(
-        (maxId, user) => Math.max(maxId, Number(user.id) || 0),
-        0,
-      ) + 1;
+  const data = await readData();
 
-    const newUser = {
-      ...userData,
-      id: nextId,
-    };
-    data.users.push(newUser);
-    await writeData(data);
-    console.log("data after adding user:", data);
-    return newUser;
-  } catch (err) {
-    console.log("Error creating users:", err);
-    throw err;
+  const userExists = data.users.find((u) => u.email === userData.email);
+  if (userExists) {
+    throw new ConflictError("User with this email already exists");
   }
+  const nextId =
+    data.users.reduce(
+      (maxId, user) => Math.max(maxId, Number(user.id) || 0),
+      0,
+    ) + 1;
+
+  const newUser = {
+    ...userData,
+    id: nextId,
+  };
+  data.users.push(newUser);
+  await writeData(data);
+  console.log("data after adding user:", data);
+  return newUser;
 };
 
 export const updateUser = async (userId, updatedData) => {
