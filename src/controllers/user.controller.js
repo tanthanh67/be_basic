@@ -10,41 +10,29 @@ export const getAllUser = catchAsync(async (req, res) => {
 });
 
 export const getUserById = catchAsync(async (req, res) => {
-  const userId = req.params.id;
+  const userId = req.userId;
 
-  const users = await userService.getAllUser();
-  const user = users.find((u) => u.id === parseInt(userId));
+  const user = await userService.getUserById(userId);
 
-  if (user) {
-    return sendSuccess(res, 200, "User retrieved successfully", user);
-  } else {
-    throw new NotFoundError("User not found");
-  }
+  return sendSuccess(res, 200, "User retrieved successfully", user);
 });
 
 export const addUser = catchAsync(async (req, res) => {
   const newUser = await userService.addUser(req.body);
+
   return sendSuccess(res, 201, "User added successfully", newUser);
 });
 
 export const updateUser = catchAsync(async (req, res) => {
-  const updatedUser = await userService.updateUser(req.params.id, req.body);
-
-  if (!updatedUser) {
-    throw new NotFoundError("User not found");
-  }
+  const updatedUser = await userService.updateUser(req.userId, req.body);
 
   return sendSuccess(res, 200, "User updated successfully", updatedUser);
 });
 
 export const deleteUser = catchAsync(async (req, res) => {
-  const userIndex = req.params.id;
+  const userId = req.userId;
 
-  const deletedUser = await userService.deleteUser(userIndex);
-
-  if (!deletedUser) {
-    throw new NotFoundError("User not found");
-  }
+  const deletedUser = await userService.deleteUser(userId);
 
   return sendSuccess(res, 200, "User deleted successfully", deletedUser);
 });

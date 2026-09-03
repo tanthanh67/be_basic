@@ -1,6 +1,6 @@
 import { readData } from "../repository/readData.js";
 import { writeData } from "../repository/writeData.js";
-import { ConflictError } from "../core/error.response.js";
+import { ConflictError, NotFoundError } from "../core/error.response.js";
 
 export const getAllUser = async () => {
   const data = await readData();
@@ -10,7 +10,10 @@ export const getAllUser = async () => {
 export const getUserById = async (userId) => {
   const data = await readData();
   const users = data.users;
-  const user = users.find((u) => u.id === parseInt(userId));
+  const user = users.find((u) => u.id === userId);
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
   return user;
 };
 
@@ -39,9 +42,9 @@ export const addUser = async (userData) => {
 
 export const updateUser = async (userId, updatedData) => {
   const data = await readData();
-  const userIndex = data.users.findIndex((u) => u.id === parseInt(userId));
+  const userIndex = data.users.findIndex((u) => u.id === userId);
   if (userIndex === -1) {
-    return null;
+    throw new NotFoundError("User not found");
   }
   data.users[userIndex] = { ...data.users[userIndex], ...updatedData };
   await writeData(data);
@@ -50,9 +53,9 @@ export const updateUser = async (userId, updatedData) => {
 
 export const deleteUser = async (userId) => {
   const data = await readData();
-  const userIndex = data.users.findIndex((u) => u.id === parseInt(userId));
+  const userIndex = data.users.findIndex((u) => u.id === userId);
   if (userIndex === -1) {
-    return null;
+    throw new NotFoundError("User not found");
   }
 
   const deletedUser = data.users[userIndex];
