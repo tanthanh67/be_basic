@@ -1,5 +1,3 @@
-import { readData } from "../repository/readData.js";
-import { writeData } from "../repository/writeData.js";
 import { ConflictError, NotFoundError } from "../core/error.response.js";
 
 export const getAllUser = async () => {

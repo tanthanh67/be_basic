@@ -5,7 +5,7 @@ import {
   createUserRules,
   updateUserRules,
 } from "../middlewares/validate.js";
-import parseUserId from "../middlewares/parseUserId.js";
+import parseUserId from "../utils/parseUserId.js";
 
 const router = Router();
 
