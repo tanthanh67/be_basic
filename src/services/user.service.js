@@ -1,14 +1,13 @@
 import { ConflictError, NotFoundError } from "../core/error.response.js";
+import * as userRepository from "../repository/user.repository.js";
 
 export const getAllUser = async () => {
-  const data = await readData();
-  return data.users;
+  return await userRepository.findAll();
 };
 
 export const getUserById = async (userId) => {
-  const data = await readData();
-  const users = data.users;
-  const user = users.find((u) => u.id === userId);
+  const id = Number(userId);
+  const user = await userRepository.findById(id);
   if (!user) {
     throw new NotFoundError("User not found");
   }
@@ -16,50 +15,37 @@ export const getUserById = async (userId) => {
 };
 
 export const addUser = async (userData) => {
-  const data = await readData();
-
-  const userExists = data.users.find((u) => u.email === userData.email);
-  if (userExists) {
-    throw new ConflictError("User with this email already exists");
+  const existingUser = await userRepository.findByEmail(userData.email);
+  if (existingUser) {
+    throw new ConflictError("Email already exists");
   }
-  const nextId =
-    data.users.reduce(
-      (maxId, user) => Math.max(maxId, Number(user.id) || 0),
-      0,
-    ) + 1;
-
-  const newUser = {
-    ...userData,
-    id: nextId,
-  };
-  data.users.push(newUser);
-  await writeData(data);
-  console.log("data after adding user:", data);
-  return newUser;
+  return await userRepository.create(userData);
 };
 
 export const updateUser = async (userId, updatedData) => {
-  const data = await readData();
-  const userIndex = data.users.findIndex((u) => u.id === userId);
-  if (userIndex === -1) {
+  const id = Number(userId);
+  const existingUser = await userRepository.findById(id);
+  if (!existingUser) {
     throw new NotFoundError("User not found");
   }
-  data.users[userIndex] = { ...data.users[userIndex], ...updatedData };
-  await writeData(data);
-  return data.users[userIndex];
+
+  if (updateData.email && updateData.email !== existingUser.email) {
+    const emailTaken = await userRepository.findByEmail(updateData.email);
+    if (emailTaken && emailTaken.id !== id) {
+      throw new ConflictError("Email already exists");
+    }
+  }
+
+  return await userRepository.update(id, updatedData);
 };
 
 export const deleteUser = async (userId) => {
-  const data = await readData();
-  const userIndex = data.users.findIndex((u) => u.id === userId);
-  if (userIndex === -1) {
+  const id = Number(userId);
+
+  const existingUser = await userRepository.findById(id);
+  if (!existingUser) {
     throw new NotFoundError("User not found");
   }
 
-  const deletedUser = data.users[userIndex];
-
-  data.users.splice(userIndex, 1);
-
-  await writeData(data);
-  return deletedUser;
+  return await userRepository.deleteById(id);
 };
