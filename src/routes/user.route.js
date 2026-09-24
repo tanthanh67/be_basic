@@ -10,15 +10,31 @@ import { requirePermission } from "../middlewares/permission.middleware.js";
 
 const router = Router();
 
-router.get("/", userController.getAllUser);
-router.get("/:id", parseUserId, userController.getUserById);
-router.post("/", validate(createUserRules), userController.addUser);
+router.get("/", requirePermission("USER_READ"), userController.getAllUser);
+router.get(
+  "/:id",
+  requirePermission("USER_READ"),
+  parseUserId,
+  userController.getUserById,
+);
+router.post(
+  "/",
+  requirePermission("USER_CREATE"),
+  validate(createUserRules),
+  userController.addUser,
+);
 router.put(
   "/:id",
+  requirePermission("USER_UPDATE"),
   parseUserId,
   validate(updateUserRules),
   userController.updateUser,
 );
-router.delete("/:id", parseUserId, userController.deleteUser);
+router.delete(
+  "/:id",
+  requirePermission("USER_DELETE"),
+  parseUserId,
+  userController.deleteUser,
+);
 
 export default router;

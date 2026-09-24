@@ -23,16 +23,15 @@ export const findAll = async ({ sortBy = "id", order = "ASC" }) => {
 export const findById = async (id) => {
   const result = await pool.query(
     "SELECT id, name, description FROM classes WHERE id = $1",
-    id,
+    [id],
   );
   return result.rows[0] | null;
 };
 
 export const findByTitle = async (title) => {
-  const result = await pool.query(
-    "SELECT * FROM classes WHERE title = $1",
+  const result = await pool.query("SELECT * FROM classes WHERE title = $1", [
     title,
-  );
+  ]);
   return result.rows[0] | null;
 };
 
