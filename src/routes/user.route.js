@@ -6,6 +6,7 @@ import {
   updateUserRules,
 } from "../middlewares/validate.js";
 import parseUserId from "../utils/parseUserId.js";
+import { requirePermission } from "../middlewares/permission.middleware.js";
 
 const router = Router();
 

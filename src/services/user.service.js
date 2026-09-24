@@ -29,7 +29,7 @@ export const updateUser = async (userId, updatedData) => {
     throw new NotFoundError("User not found");
   }
 
-  if (updateData.email && updateData.email !== existingUser.email) {
+  if (updatedData.email && updatedData.email !== existingUser.email) {
     const emailTaken = await userRepository.findByEmail(updateData.email);
     if (emailTaken && emailTaken.id !== id) {
       throw new ConflictError("Email already exists");
