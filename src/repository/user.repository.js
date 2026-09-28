@@ -13,16 +13,15 @@ export const findAll = async ({ sortBy = "id", order = "ASC" }) => {
     throw new Error(`Invalid sort order: ${order}`);
   }
 
-  const result = await pool.query("SELECT * FROM users ORDER BY $1 $2", [
-    sortBy,
-    order,
-  ]);
+  const result = await pool.query(
+    `SELECT * FROM users ORDER BY ${sortBy} ${order}`,
+  );
   return result.rows;
 };
 
 export const findById = async (id) => {
   const result = await pool.query(
-    "SELECT id, name, email, age, role, created_at FROM users WHERE id = $1",
+    "SELECT id, name, email, age, created_at FROM users WHERE id = $1",
     [id],
   );
   return result.rows[0] || null;

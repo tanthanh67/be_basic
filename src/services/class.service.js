@@ -1,12 +1,12 @@
 import { ConflictError, NotFoundError } from "../core/error.response.js";
 import * as classRepository from "../repository/class.repository.js";
 
-export const getAllClasses = async () => {
-  return classRepository.findAll();
+export const getAllClasses = async (query) => {
+  return classRepository.findAll(query);
 };
 
 export const createClass = async (classData) => {
-  const existingClass = await classRepository.findByTitle(classData.title);
+  const existingClass = await classRepository.findByName(classData.name);
   if (existingClass) {
     throw new ConflictError("Class already exist");
   }

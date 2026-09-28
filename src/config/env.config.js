@@ -20,4 +20,11 @@ export const config = {
       process.env.JWT_REFRESH_SECRET || "default_refresh_secret_key",
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
   },
+  r2: {
+    accountId: process.env.R2_ACCOUNT_ID || "",
+    bucketName: process.env.R2_BUCKET_NAME || "",
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
+    publicUrl: process.env.R2_PUBLIC_URL || "",
+  },
 };

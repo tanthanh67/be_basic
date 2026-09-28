@@ -8,7 +8,7 @@ export const hasPermission = async (userId, permission) => {
                 FROM user_roles ur
                 JOIN role_permissions rp
                     ON rp.role_id = ur.role_id
-                JOIN permission p
+                JOIN permissions p
                     ON p.id = rp.permission_id
                 WHERE ur.user_id = $1
                     AND p.name = $2

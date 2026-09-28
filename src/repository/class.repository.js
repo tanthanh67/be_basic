@@ -13,10 +13,9 @@ export const findAll = async ({ sortBy = "id", order = "ASC" }) => {
     throw new Error(`Invalid sort order: ${order}`);
   }
 
-  const result = await pool.query("SELECT * FROM classes ORDER BY $1 $2", [
-    sortBy,
-    order,
-  ]);
+  const result = await pool.query(
+    `SELECT * FROM classes ORDER BY ${sortBy} ${order}`,
+  );
   return result.rows;
 };
 
@@ -25,14 +24,14 @@ export const findById = async (id) => {
     "SELECT id, name, description FROM classes WHERE id = $1",
     [id],
   );
-  return result.rows[0] | null;
+  return result.rows[0] || null;
 };
 
-export const findByTitle = async (title) => {
-  const result = await pool.query("SELECT * FROM classes WHERE title = $1", [
-    title,
+export const findByName = async (name) => {
+  const result = await pool.query("SELECT * FROM classes WHERE name = $1", [
+    name,
   ]);
-  return result.rows[0] | null;
+  return result.rows[0] || null;
 };
 
 export const create = async ({ name, description }) => {
@@ -62,5 +61,5 @@ export const deleteById = async (id) => {
     "DELETE FROM classes WHERE id = $1 RETURNING *",
     [id],
   );
-  return result.rows[0] | null;
+  return result.rows[0] || null;
 };
