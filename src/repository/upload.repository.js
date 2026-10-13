@@ -2,7 +2,6 @@ import pool from "../config/db.config.js";
 
 export const create = async ({
   key,
-  url,
   originalName,
   mimeType,
   size,
@@ -10,14 +9,19 @@ export const create = async ({
 }) => {
   const result = await pool.query(
     `
-        INSERT INTO uploads (r2_key, url, original_name, mime_type, size_bytes, uploaded_by)
-        VALUES ($1, $2, $3, $4, $5, $6) 
+        INSERT INTO uploads (r2_key, original_name, mime_type, size_bytes, uploaded_by)
+        VALUES ($1, $2, $3, $4, $5) 
         RETURNING *
     `,
-    [key, url, originalName, mimeType, size, uploadedBy],
+    [key, originalName, mimeType, size, uploadedBy],
   );
 
   return result.rows[0];
+};
+
+export const findById = async (id) => {
+  const result = await pool.query("SELECT * FROM uploads WHERE id = $1", [id]);
+  return result.rows[0] || null;
 };
 
 export const createMany = async (files) => {
@@ -31,13 +35,13 @@ export const createMany = async (files) => {
     for (const file of files) {
       const result = await client.query(
         `
-            INSERT INTO uploads (r2_key, url, original_name, mime_type, size_bytes, uploaded_by)
-            VALUES ($1, $2, $3, $4, $5, $6) 
+            INSERT INTO uploads (r2_key, original_name, mime_type, size_bytes, uploaded_by)
+            VALUES ($1, $2, $3, $4, $5) 
             RETURNING *
         `,
         [
           file.key,
-          file.url,
+
           file.originalName,
           file.mimeType,
           file.size,

@@ -4,6 +4,7 @@ import * as uploadController from "../controllers/upload.controller.js";
 
 const router = Router();
 
+router.get("/:id/url", uploadController.getFileUrl);
 router.post("/", uploadImg.single("image"), uploadController.uploadImage);
 router.post(
   "/documents",
