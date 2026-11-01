@@ -9,6 +9,11 @@ export const register = catchAsync(async (req, res) => {
 
 export const login = catchAsync(async (req, res) => {
   const { user, accessToken, refreshToken } = await authService.login(req.body);
+
+  res.cookie("refresh", refreshToken, {
+    httpOnly: true,
+  });
+
   return sendSuccess(res, 200, "Login successful", {
     user,
     accessToken,
