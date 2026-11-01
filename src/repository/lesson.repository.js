@@ -13,10 +13,9 @@ export const findAll = async ({ sortBy = "id", order = "ASC" }) => {
     throw new Error(`Invalid sort order: ${order}`);
   }
 
-  const result = await pool.query("SELECT * FROM lessons ORDER BY $1 $2", [
-    sortBy,
-    order,
-  ]);
+  const result = await pool.query(
+    `SELECT * FROM lessons ORDER BY ${sortBy} ${order}`,
+  );
   return result.rows;
 };
 
@@ -27,4 +26,3 @@ export const create = async ({ class_id, title, content, lesson_order }) => {
   );
   return result.rows[0];
 };
-

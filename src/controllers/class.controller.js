@@ -3,7 +3,7 @@ import catchAsync from "../utils/catchAsync.js";
 import { sendSuccess } from "../utils/responseHelper.js";
 
 export const getAllClasses = catchAsync(async (req, res) => {
-  const classes = await classService.getAllClasses();
+  const classes = await classService.getAllClasses(req.query);
 
   return sendSuccess(res, 200, "Classes retrieved succesfully", classes);
 });

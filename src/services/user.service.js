@@ -1,8 +1,8 @@
 import { ConflictError, NotFoundError } from "../core/error.response.js";
 import * as userRepository from "../repository/user.repository.js";
 
-export const getAllUser = async () => {
-  return await userRepository.findAll();
+export const getAllUser = async (query) => {
+  return await userRepository.findAll(query);
 };
 
 export const getUserById = async (userId) => {
@@ -30,7 +30,7 @@ export const updateUser = async (userId, updatedData) => {
   }
 
   if (updatedData.email && updatedData.email !== existingUser.email) {
-    const emailTaken = await userRepository.findByEmail(updateData.email);
+    const emailTaken = await userRepository.findByEmail(updatedData.email);
     if (emailTaken && emailTaken.id !== id) {
       throw new ConflictError("Email already exists");
     }

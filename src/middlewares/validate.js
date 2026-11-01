@@ -1,4 +1,4 @@
-import { validationResult, body } from "express-validator";
+import { validationResult, body, param } from "express-validator";
 import { BadRequestError } from "../core/error.response.js";
 
 export const validate = (rules) => {
@@ -25,6 +25,16 @@ export const validate = (rules) => {
     return next(error);
   };
 };
+
+export const idParamRules = [
+  param("id")
+    .trim()
+    .notEmpty()
+    .withMessage("ID is required")
+    .isInt({ min: 1 })
+    .withMessage("ID must be a positive integer")
+    .toInt(),
+];
 
 export const createUserRules = [
   body("name")
