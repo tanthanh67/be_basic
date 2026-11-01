@@ -1,5 +1,6 @@
 import { ConflictError, NotFoundError } from "../core/error.response.js";
 import * as userRepository from "../repository/user.repository.js";
+import { hashPassword } from "../utils/password.helper.js";
 
 export const getAllUser = async (query) => {
   return await userRepository.findAll(query);
@@ -14,29 +15,44 @@ export const getUserById = async (userId) => {
   return user;
 };
 
-export const addUser = async (userData) => {
-  const existingUser = await userRepository.findByEmail(userData.email);
+export const addUser = async ({ name, email, password, age }) => {
+  const existingUser = await userRepository.findByEmail(email);
   if (existingUser) {
     throw new ConflictError("Email already exists");
   }
-  return await userRepository.create(userData);
+
+  const hashedPassword = await hashPassword(password);
+
+  return await userRepository.create({
+    name,
+    email,
+    password: hashedPassword,
+    age,
+  });
 };
 
-export const updateUser = async (userId, updatedData) => {
+export const updateUser = async (userId, { name, email, password, age }) => {
   const id = Number(userId);
   const existingUser = await userRepository.findById(id);
   if (!existingUser) {
     throw new NotFoundError("User not found");
   }
 
-  if (updatedData.email && updatedData.email !== existingUser.email) {
+  if (email && email !== existingUser.email) {
     const emailTaken = await userRepository.findByEmail(updatedData.email);
     if (emailTaken && emailTaken.id !== id) {
       throw new ConflictError("Email already exists");
     }
   }
 
-  return await userRepository.update(id, updatedData);
+  const hashedPassword = hashPassword(password);
+
+  return await userRepository.update(id, {
+    name,
+    email,
+    password: hashedPassword,
+    age,
+  });
 };
 
 export const deleteUser = async (userId) => {

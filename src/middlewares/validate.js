@@ -52,6 +52,12 @@ export const createUserRules = [
     .withMessage("Email is not valid")
     .normalizeEmail(),
 
+  body("password")
+    .notEmpty()
+    .trim()
+    .isStrongPassword()
+    .withMessage("Password is not strong"),
+
   body("age")
     .optional()
     .isInt({ min: 1, max: 120 })
@@ -71,6 +77,12 @@ export const updateUserRules = [
     .isEmail()
     .withMessage("Email is not valid")
     .normalizeEmail(),
+
+  body("password")
+    .optional()
+    .trim()
+    .isStrongPassword()
+    .withMessage("Password is not strong"),
 
   body("age")
     .optional()

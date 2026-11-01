@@ -27,6 +27,22 @@ export const findById = async (id) => {
   return result.rows[0] || null;
 };
 
+export const hasRole = async (userId, roleName) => {
+  const result = await pool.query(
+    `
+      SELECT EXISTS (
+        SELECT 1
+        FROM user_roles ur
+        JOIN roles r ON r.id = ur.role_id
+        WHERE ur.user_id = $1 AND r.name = $2
+      ) AS has_role
+    `,
+    [userId, roleName],
+  );
+
+  return result.rows[0].has_role;
+};
+
 export const findByEmail = async (email) => {
   const result = await pool.query("SELECT * FROM users WHERE email = $1", [
     email,
