@@ -236,3 +236,48 @@ export const updateClassRules = [
     .isInt({ min: 1 })
     .withMessage("ID của mentor phải là số nguyên dương"),
 ];
+
+export const createLessonRules = [
+  body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("Tiêu đề không được để trống")
+    .bail()
+    .isLength({ max: 255 })
+    .withMessage("Tiêu đề không được vượt quá 255 ký tự"),
+
+  body("content")
+    .optional()
+    .isString()
+    .withMessage("Nội dung phải là chuỗi"),
+
+  body("order")
+    .notEmpty()
+    .withMessage("Thứ tự bài học không được để trống")
+    .bail()
+    .isInt({ min: 1 })
+    .withMessage("Thứ tự bài học phải là số nguyên dương")
+    .toInt(),
+];
+
+export const updateLessonRules = [
+  body("title")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("Tiêu đề không được để trống")
+    .bail()
+    .isLength({ max: 255 })
+    .withMessage("Tiêu đề không được vượt quá 255 ký tự"),
+
+  body("content")
+    .optional()
+    .isString()
+    .withMessage("Nội dung phải là chuỗi"),
+
+  body("order")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Thứ tự bài học phải là số nguyên dương")
+    .toInt(),
+];
