@@ -281,3 +281,60 @@ export const updateLessonRules = [
     .withMessage("Thứ tự bài học phải là số nguyên dương")
     .toInt(),
 ];
+
+export const createAssignmentRules = [
+  body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("Tiêu đề không được để trống")
+    .bail()
+    .isLength({ max: 255 })
+    .withMessage("Tiêu đề không được vượt quá 255 ký tự"),
+
+  body("description")
+    .optional()
+    .isString()
+    .withMessage("Mô tả phải là chuỗi"),
+
+  body("deadline")
+    .notEmpty()
+    .withMessage("Deadline không được để trống")
+    .bail()
+    .isISO8601({ strict: true })
+    .withMessage("Deadline phải là ngày giờ hợp lệ theo chuẩn ISO 8601"),
+
+  body("maximumScore")
+    .notEmpty()
+    .withMessage("Điểm tối đa không được để trống")
+    .bail()
+    .isFloat({ gt: 0, max: 10 })
+    .withMessage("Điểm tối đa phải lớn hơn 0 và không quá 10")
+    .toFloat(),
+];
+
+export const updateAssignmentRules = [
+  body("title")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("Tiêu đề không được để trống")
+    .bail()
+    .isLength({ max: 255 })
+    .withMessage("Tiêu đề không được vượt quá 255 ký tự"),
+
+  body("description")
+    .optional()
+    .isString()
+    .withMessage("Mô tả phải là chuỗi"),
+
+  body("deadline")
+    .optional()
+    .isISO8601({ strict: true })
+    .withMessage("Deadline phải là ngày giờ hợp lệ theo chuẩn ISO 8601"),
+
+  body("maximumScore")
+    .optional()
+    .isFloat({ gt: 0, max: 10 })
+    .withMessage("Điểm tối đa phải lớn hơn 0 và không quá 10")
+    .toFloat(),
+];
