@@ -1,7 +1,14 @@
 import pool from "../config/db.config.js";
 
 export const findAll = async ({ sortBy = "id", order = "ASC" }) => {
-  const validSortColumns = ["id", "name", "description"];
+  const validSortColumns = [
+    "id",
+    "name",
+    "description",
+    "start_date",
+    "end_date",
+    "mentor_id",
+  ];
 
   if (!validSortColumns.includes(sortBy)) {
     throw new Error(`Invalid sort column: ${sortBy}`);
@@ -14,14 +21,14 @@ export const findAll = async ({ sortBy = "id", order = "ASC" }) => {
   }
 
   const result = await pool.query(
-    `SELECT * FROM classes ORDER BY ${sortBy} ${order}`,
+    `SELECT id, name, description, start_date, end_date, mentor_id FROM classes ORDER BY ${sortBy} ${order}`,
   );
   return result.rows;
 };
 
 export const findById = async (id) => {
   const result = await pool.query(
-    "SELECT id, name, description FROM classes WHERE id = $1",
+    "SELECT id, name, description, start_date, end_date, mentor_id FROM classes WHERE id = $1",
     [id],
   );
   return result.rows[0] || null;
@@ -34,24 +41,44 @@ export const findByName = async (name) => {
   return result.rows[0] || null;
 };
 
-export const create = async ({ name, description }) => {
+export const create = async ({
+  name,
+  description,
+  startDate,
+  endDate,
+  mentorId,
+}) => {
   const result = await pool.query(
-    "INSERT INTO classes (name, description) VALUES ($1, $2) RETURNING *",
-    [name, description],
+    "INSERT INTO classes (name, description, start_date, end_date, mentor_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+    [name, description, startDate, endDate, mentorId],
   );
   return result.rows[0];
 };
 
-export const update = async (id, { name, description }) => {
+export const update = async (
+  id,
+  { name, description, startDate, endDate, mentorId },
+) => {
   const result = await pool.query(
     `
       UPDATE classes
       SET name = COALESCE($1, name),
-          description = COALESCE($2, description)
-      WHERE id = $3
+          description = COALESCE($2, description),
+          start_date = COALESCE($3, start_date),
+          end_date = COALESCE($4, end_date),
+          mentor_id = COALESCE($5, mentor_id),
+          updated_at = NOW()
+      WHERE id = $6
       RETURNING *
     `,
-    [name ?? null, description ?? null, id],
+    [
+      name ?? null,
+      description ?? null,
+      startDate ?? null,
+      endDate ?? null,
+      mentorId ?? null,
+      id,
+    ],
   );
   return result.rows[0];
 };

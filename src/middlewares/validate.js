@@ -133,3 +133,62 @@ export const loginRules = [
     .notEmpty()
     .withMessage("Mật khẩu không được để trống"),
 ];
+
+export const createClassRules = [
+  body("name")
+    .trim()
+    .notEmpty()
+    .withMessage("Tên lớp không được để trống")
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Tên lớp phải từ 2 đến 100 ký tự"),
+
+  body("description")
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage("Mô tả không được vượt quá 500 ký tự"),
+
+  body("startDate")
+    .trim()
+    .notEmpty()
+    .withMessage("Ngày bắt đầu không được để trống")
+    .isISO8601()
+    .withMessage("Ngày bắt đầu không đúng định dạng"),
+
+  body("endDate")
+    .trim()
+    .notEmpty()
+    .withMessage("Ngày kết thúc không được để trống")
+    .isISO8601()
+    .withMessage("Ngày kết thúc không đúng định dạng"),
+
+  body("mentorId")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("ID của mentor phải là số nguyên dương"),
+];
+
+export const updateClassRules = [
+  body("name")
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Tên lớp phải từ 2 đến 100 ký tự"),
+  body("description")
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage("Mô tả không được vượt quá 500 ký tự"),
+  body("startDate")
+    .optional()
+    .isISO8601()
+    .withMessage("Ngày bắt đầu không đúng định dạng"),
+  body("endDate")
+    .optional()
+    .isISO8601()
+    .withMessage("Ngày kết thúc không đúng định dạng"),
+  body("mentorId")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("ID của mentor phải là số nguyên dương"),
+];
