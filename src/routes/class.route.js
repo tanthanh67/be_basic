@@ -6,11 +6,24 @@ import {
   updateClassRules,
   validate,
 } from "../middlewares/validate.js";
-import { requirePermission } from "../middlewares/permission.middleware.js";
+import {
+  requireAnyPermission,
+  requirePermission,
+} from "../middlewares/permission.middleware.js";
 
 const router = Router();
 
-router.get("/", classController.getAllClasses);
+router.get(
+  "/",
+  requireAnyPermission("CLASS_READ_ALL", "CLASS_READ_OWN"),
+  classController.getAllClasses,
+);
+router.get(
+  "/:id",
+  requireAnyPermission("CLASS_READ_ALL", "CLASS_READ_OWN"),
+  validate(idParamRules),
+  classController.getClassById,
+);
 router.post(
   "/",
   requirePermission("CLASS_CREATE"),

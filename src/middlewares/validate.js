@@ -26,6 +26,27 @@ export const validate = (rules) => {
   };
 };
 
+export const memberIdParamRules = [
+  param("memberId")
+    .trim()
+    .notEmpty()
+    .withMessage("Member ID is required")
+    .bail()
+    .isInt({ min: 1 })
+    .withMessage("Member ID must be a positive integer")
+    .toInt(),
+];
+
+export const addClassMemberRules = [
+  body("memberId")
+    .notEmpty()
+    .withMessage("memberId không được để trống")
+    .bail()
+    .isInt({ min: 1 })
+    .withMessage("memberId phải là số nguyên dương")
+    .toInt(),
+];
+
 export const idParamRules = [
   param("id")
     .trim()

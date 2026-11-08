@@ -19,3 +19,21 @@ export const hasPermission = async (userId, permission) => {
 
   return result.rows[0].has_permission;
 };
+
+export const hasAnyPermission = async (userId, permissions) => {
+  const result = await pool.query(
+    `
+      SELECT EXISTS (
+        SELECT 1
+        FROM user_roles ur
+        JOIN role_permissions rp ON rp.role_id = ur.role_id
+        JOIN permissions p ON p.id = rp.permission_id
+        WHERE ur.user_id = $1
+          AND p.name = ANY($2::text[])
+      ) AS has_permission
+    `,
+    [userId, permissions],
+  );
+
+  return result.rows[0].has_permission;
+};

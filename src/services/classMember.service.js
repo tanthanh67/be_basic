@@ -49,3 +49,20 @@ export const addClassMember = async (classId, memberId) => {
 
   return newMember;
 };
+
+export const removeClassMember = async (classId, memberId) => {
+  const existingClass = await classRepository.findById(classId);
+  if (!existingClass) {
+    throw new NotFoundError("Class not found");
+  }
+
+  const removedMember = await classMembersRepository.deleteMembership(
+    classId,
+    memberId,
+  );
+  if (!removedMember) {
+    throw new NotFoundError("Member not found in this class");
+  }
+
+  return removedMember;
+};

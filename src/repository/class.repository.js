@@ -1,7 +1,10 @@
 import pool from "../config/db.config.js";
 import { BadRequestError } from "../core/error.response.js";
 
-export const findAll = async ({ sortBy = "id", order = "ASC" }) => {
+const CLASS_COLUMNS =
+  "c.id, c.name, c.description, c.start_date, c.end_date, c.mentor_id";
+
+const buildOrderBy = ({ sortBy = "id", order = "ASC" }) => {
   const validSortColumns = [
     "id",
     "name",
@@ -21,8 +24,29 @@ export const findAll = async ({ sortBy = "id", order = "ASC" }) => {
     throw new BadRequestError(`Invalid sort order: ${order}`);
   }
 
+  return `ORDER BY c.${sortBy} ${order}`;
+};
+
+export const findAll = async (query) => {
   const result = await pool.query(
-    `SELECT id, name, description, start_date, end_date, mentor_id FROM classes ORDER BY ${sortBy} ${order}`,
+    `SELECT ${CLASS_COLUMNS} FROM classes c ${buildOrderBy(query)}`,
+  );
+  return result.rows;
+};
+
+export const findAllForUser = async (userId, query) => {
+  const result = await pool.query(
+    `
+      SELECT ${CLASS_COLUMNS}
+      FROM classes c
+      WHERE c.mentor_id = $1
+         OR EXISTS (
+           SELECT 1 FROM class_members cm
+           WHERE cm.class_id = c.id AND cm.member_id = $1
+         )
+      ${buildOrderBy(query)}
+    `,
+    [userId],
   );
   return result.rows;
 };

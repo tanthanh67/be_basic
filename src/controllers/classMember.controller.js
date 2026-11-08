@@ -16,3 +16,18 @@ export const addClassMember = catchAsync(async (req, res) => {
 
   return sendSuccess(res, 201, "Member added to class successfully", newMember);
 });
+
+export const removeClassMember = catchAsync(async (req, res) => {
+  const { id: classId, memberId } = req.params;
+  const removedMember = await classMemberService.removeClassMember(
+    classId,
+    memberId,
+  );
+
+  return sendSuccess(
+    res,
+    200,
+    "Member removed from class successfully",
+    removedMember,
+  );
+});
