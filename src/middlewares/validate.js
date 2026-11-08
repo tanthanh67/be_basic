@@ -236,3 +236,142 @@ export const updateClassRules = [
     .isInt({ min: 1 })
     .withMessage("ID của mentor phải là số nguyên dương"),
 ];
+
+export const createLessonRules = [
+  body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("Tiêu đề không được để trống")
+    .bail()
+    .isLength({ max: 255 })
+    .withMessage("Tiêu đề không được vượt quá 255 ký tự"),
+
+  body("content")
+    .optional()
+    .isString()
+    .withMessage("Nội dung phải là chuỗi"),
+
+  body("order")
+    .notEmpty()
+    .withMessage("Thứ tự bài học không được để trống")
+    .bail()
+    .isInt({ min: 1 })
+    .withMessage("Thứ tự bài học phải là số nguyên dương")
+    .toInt(),
+];
+
+export const updateLessonRules = [
+  body("title")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("Tiêu đề không được để trống")
+    .bail()
+    .isLength({ max: 255 })
+    .withMessage("Tiêu đề không được vượt quá 255 ký tự"),
+
+  body("content")
+    .optional()
+    .isString()
+    .withMessage("Nội dung phải là chuỗi"),
+
+  body("order")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Thứ tự bài học phải là số nguyên dương")
+    .toInt(),
+];
+
+export const createAssignmentRules = [
+  body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("Tiêu đề không được để trống")
+    .bail()
+    .isLength({ max: 255 })
+    .withMessage("Tiêu đề không được vượt quá 255 ký tự"),
+
+  body("description")
+    .optional()
+    .isString()
+    .withMessage("Mô tả phải là chuỗi"),
+
+  body("deadline")
+    .notEmpty()
+    .withMessage("Deadline không được để trống")
+    .bail()
+    .isISO8601({ strict: true })
+    .withMessage("Deadline phải là ngày giờ hợp lệ theo chuẩn ISO 8601"),
+
+  body("maximumScore")
+    .notEmpty()
+    .withMessage("Điểm tối đa không được để trống")
+    .bail()
+    .isFloat({ gt: 0, max: 10 })
+    .withMessage("Điểm tối đa phải lớn hơn 0 và không quá 10")
+    .toFloat(),
+];
+
+export const updateAssignmentRules = [
+  body("title")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("Tiêu đề không được để trống")
+    .bail()
+    .isLength({ max: 255 })
+    .withMessage("Tiêu đề không được vượt quá 255 ký tự"),
+
+  body("description")
+    .optional()
+    .isString()
+    .withMessage("Mô tả phải là chuỗi"),
+
+  body("deadline")
+    .optional()
+    .isISO8601({ strict: true })
+    .withMessage("Deadline phải là ngày giờ hợp lệ theo chuẩn ISO 8601"),
+
+  body("maximumScore")
+    .optional()
+    .isFloat({ gt: 0, max: 10 })
+    .withMessage("Điểm tối đa phải lớn hơn 0 và không quá 10")
+    .toFloat(),
+];
+
+export const submitAssignmentRules = [
+  body("content")
+    .optional()
+    .isString()
+    .withMessage("Nội dung phải là chuỗi")
+    .trim(),
+
+  body("repositoryUrl")
+    .optional()
+    .trim()
+    .isURL({ protocols: ["http", "https"], require_protocol: true })
+    .withMessage("Link repository phải là URL hợp lệ (http hoặc https)")
+    .bail()
+    .isLength({ max: 2048 })
+    .withMessage("Link repository không được vượt quá 2048 ký tự"),
+
+  body()
+    .custom((value) => Boolean(value?.content || value?.repositoryUrl))
+    .withMessage("Cần có nội dung hoặc link repository"),
+];
+
+export const reviewSubmissionRules = [
+  body("score")
+    .notEmpty()
+    .withMessage("Điểm không được để trống")
+    .bail()
+    .isFloat({ min: 0, max: 10 })
+    .withMessage("Điểm phải từ 0 đến 10")
+    .toFloat(),
+
+  body("feedback")
+    .optional()
+    .isString()
+    .withMessage("Nhận xét phải là chuỗi")
+    .trim(),
+];

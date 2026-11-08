@@ -3,6 +3,7 @@ const { Pool } = pkg;
 import { config } from "./env.config.js";
 
 pkg.types.setTypeParser(1082, (value) => value);
+pkg.types.setTypeParser(1700, parseFloat);
 
 const pool = new Pool({
   host: config.db.host,
