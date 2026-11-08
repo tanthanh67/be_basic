@@ -23,12 +23,15 @@ export const addUser = async ({ name, email, password, age }) => {
 
   const hashedPassword = await hashPassword(password);
 
-  return await userRepository.create({
-    name,
-    email,
-    password: hashedPassword,
-    age,
-  });
+  return await userRepository.createWithRole(
+    {
+      name,
+      email,
+      password: hashedPassword,
+      age,
+    },
+    "MEMBER",
+  );
 };
 
 export const updateUser = async (userId, { name, email, password, age }) => {
@@ -39,13 +42,16 @@ export const updateUser = async (userId, { name, email, password, age }) => {
   }
 
   if (email && email !== existingUser.email) {
-    const emailTaken = await userRepository.findByEmail(updatedData.email);
+    const emailTaken = await userRepository.findByEmail(email);
     if (emailTaken && emailTaken.id !== id) {
       throw new ConflictError("Email already exists");
     }
   }
 
-  const hashedPassword = hashPassword(password);
+  let hashedPassword;
+  if (password) {
+    hashedPassword = await hashPassword(password);
+  }
 
   return await userRepository.update(id, {
     name,

@@ -3,9 +3,18 @@ import catchAsync from "../utils/catchAsync.js";
 import { sendSuccess } from "../utils/responseHelper.js";
 
 export const getAllClasses = catchAsync(async (req, res) => {
-  const classes = await classService.getAllClasses(req.query);
+  const classes = await classService.getAllClasses(req.query, req.user.id);
 
   return sendSuccess(res, 200, "Classes retrieved succesfully", classes);
+});
+
+export const getClassById = catchAsync(async (req, res) => {
+  const foundClass = await classService.getClassById(
+    req.params.id,
+    req.user.id,
+  );
+
+  return sendSuccess(res, 200, "Class retrieved successfully", foundClass);
 });
 
 export const createClass = catchAsync(async (req, res) => {

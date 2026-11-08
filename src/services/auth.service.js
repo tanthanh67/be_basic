@@ -12,7 +12,7 @@ import {
 } from "../utils/jwt.helper.js";
 import { hashPassword, comparePassword } from "../utils/password.helper.js";
 
-export const register = async ({ name, email, password, age, role }) => {
+export const register = async ({ name, email, password, age }) => {
   const existingUser = await userRepository.findByEmail(email);
   if (existingUser) {
     throw new ConflictError("Email already exists");
@@ -20,13 +20,15 @@ export const register = async ({ name, email, password, age, role }) => {
 
   const hashedPassword = await hashPassword(password);
 
-  const newUser = await userRepository.create({
-    name,
-    email,
-    password: hashedPassword,
-    age,
-    role: role || "MEMBER",
-  });
+  const newUser = await userRepository.createWithRole(
+    {
+      name,
+      email,
+      password: hashedPassword,
+      age,
+    },
+    "MEMBER",
+  );
 
   return newUser;
 };
@@ -42,10 +44,11 @@ export const login = async ({ email, password }) => {
     throw new UnauthorizedError("Invalid email or password");
   }
 
+  const roleNames = await userRepository.findRoleNames(user.id);
+
   const tokenPayload = {
     id: user.id,
     email: user.email,
-    
   };
 
   const accessToken = generateToken(tokenPayload);
@@ -56,7 +59,8 @@ export const login = async ({ email, password }) => {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role,
+      age: user.age,
+      roles: roleNames,
       created_at: user.created_at,
     },
     accessToken,
@@ -70,7 +74,9 @@ export const getMe = async (userId) => {
     throw new NotFoundError("User not found");
   }
 
-  return user;
+  const roleName = await userRepository.findRoleNames(user.id);
+
+  return { ...user, roles: roleName };
 };
 
 export const refreshAccessToken = async (refreshToken) => {

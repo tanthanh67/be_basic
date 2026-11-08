@@ -43,3 +43,15 @@ export const create = async (classId, memberId) => {
   );
   return result.rows[0] || null;
 };
+
+export const deleteMembership = async (classId, memberId) => {
+  const result = await pool.query(
+    `
+        DELETE FROM class_members
+        WHERE class_id = $1 AND member_id = $2
+        RETURNING class_id, member_id, joined_at
+    `,
+    [classId, memberId],
+  );
+  return result.rows[0] || null;
+};

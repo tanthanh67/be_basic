@@ -2,6 +2,8 @@ import pkg from "pg";
 const { Pool } = pkg;
 import { config } from "./env.config.js";
 
+pkg.types.setTypeParser(1082, (value) => value);
+
 const pool = new Pool({
   host: config.db.host,
   port: config.db.port,

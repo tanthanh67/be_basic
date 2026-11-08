@@ -26,6 +26,27 @@ export const validate = (rules) => {
   };
 };
 
+export const memberIdParamRules = [
+  param("memberId")
+    .trim()
+    .notEmpty()
+    .withMessage("Member ID is required")
+    .bail()
+    .isInt({ min: 1 })
+    .withMessage("Member ID must be a positive integer")
+    .toInt(),
+];
+
+export const addClassMemberRules = [
+  body("memberId")
+    .notEmpty()
+    .withMessage("memberId không được để trống")
+    .bail()
+    .isInt({ min: 1 })
+    .withMessage("memberId phải là số nguyên dương")
+    .toInt(),
+];
+
 export const idParamRules = [
   param("id")
     .trim()
@@ -132,4 +153,86 @@ export const loginRules = [
     .trim()
     .notEmpty()
     .withMessage("Mật khẩu không được để trống"),
+];
+
+// Only accept real calendar dates in YYYY-MM-DD form (rejects 2026-02-30 and date-times).
+const DATE_FORMAT = { format: "YYYY-MM-DD", strictMode: true, delimiters: ["-"] };
+
+// endDate must not be before startDate when both are in the request body.
+// When only one of them is sent (update), the service compares against the stored value.
+const isNotBeforeStartDate = (endDate, { req }) => {
+  const startDate = req.body.startDate;
+  if (startDate && endDate < startDate) {
+    return false;
+  }
+  return true;
+};
+
+export const createClassRules = [
+  body("name")
+    .trim()
+    .notEmpty()
+    .withMessage("Tên lớp không được để trống")
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Tên lớp phải từ 2 đến 100 ký tự"),
+
+  body("description")
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage("Mô tả không được vượt quá 500 ký tự"),
+
+  body("startDate")
+    .trim()
+    .notEmpty()
+    .withMessage("Ngày bắt đầu không được để trống")
+    .bail()
+    .isDate(DATE_FORMAT)
+    .withMessage("Ngày bắt đầu phải là ngày hợp lệ dạng YYYY-MM-DD"),
+
+  body("endDate")
+    .trim()
+    .notEmpty()
+    .withMessage("Ngày kết thúc không được để trống")
+    .bail()
+    .isDate(DATE_FORMAT)
+    .withMessage("Ngày kết thúc phải là ngày hợp lệ dạng YYYY-MM-DD")
+    .bail()
+    .custom(isNotBeforeStartDate)
+    .withMessage("Ngày kết thúc không được trước ngày bắt đầu"),
+
+  body("mentorId")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("ID của mentor phải là số nguyên dương"),
+];
+
+export const updateClassRules = [
+  body("name")
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Tên lớp phải từ 2 đến 100 ký tự"),
+  body("description")
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage("Mô tả không được vượt quá 500 ký tự"),
+  body("startDate")
+    .optional()
+    .trim()
+    .isDate(DATE_FORMAT)
+    .withMessage("Ngày bắt đầu phải là ngày hợp lệ dạng YYYY-MM-DD"),
+  body("endDate")
+    .optional()
+    .trim()
+    .isDate(DATE_FORMAT)
+    .withMessage("Ngày kết thúc phải là ngày hợp lệ dạng YYYY-MM-DD")
+    .bail()
+    .custom(isNotBeforeStartDate)
+    .withMessage("Ngày kết thúc không được trước ngày bắt đầu"),
+  body("mentorId")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("ID của mentor phải là số nguyên dương"),
 ];
