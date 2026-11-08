@@ -1,13 +1,12 @@
 import {
   BadRequestError,
   ConflictError,
-  ForbiddenError,
   NotFoundError,
 } from "../core/error.response.js";
 import * as classRepository from "../repository/class.repository.js";
-import * as classMemberRepository from "../repository/classMember.repository.js";
 import * as userRepository from "../repository/user.repository.js";
 import { checkPermission } from "./permission.service.js";
+import { ensureCanView, getClassAccess } from "./classAccess.service.js";
 
 export const getAllClasses = async (query, userId) => {
   const canReadAll = await checkPermission(userId, "CLASS_READ_ALL");
@@ -19,27 +18,10 @@ export const getAllClasses = async (query, userId) => {
 };
 
 export const getClassById = async (classId, userId) => {
-  const id = Number(classId);
-  const existingClass = await classRepository.findById(id);
+  const access = await getClassAccess(Number(classId), userId);
+  ensureCanView(access);
 
-  if (!existingClass) {
-    throw new NotFoundError("Class not found");
-  }
-
-  const canReadAll = await checkPermission(userId, "CLASS_READ_ALL");
-  if (canReadAll) {
-    return existingClass;
-  }
-
-  const isMentor = existingClass.mentor_id === userId;
-  if (!isMentor) {
-    const membership = await classMemberRepository.findMembership(id, userId);
-    if (!membership) {
-      throw new ForbiddenError("You do not have access to this class");
-    }
-  }
-
-  return existingClass;
+  return access.class;
 };
 
 export const createClass = async (classData) => {
