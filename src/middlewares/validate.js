@@ -134,6 +134,19 @@ export const loginRules = [
     .withMessage("Mật khẩu không được để trống"),
 ];
 
+// Only accept real calendar dates in YYYY-MM-DD form (rejects 2026-02-30 and date-times).
+const DATE_FORMAT = { format: "YYYY-MM-DD", strictMode: true, delimiters: ["-"] };
+
+// endDate must not be before startDate when both are in the request body.
+// When only one of them is sent (update), the service compares against the stored value.
+const isNotBeforeStartDate = (endDate, { req }) => {
+  const startDate = req.body.startDate;
+  if (startDate && endDate < startDate) {
+    return false;
+  }
+  return true;
+};
+
 export const createClassRules = [
   body("name")
     .trim()
@@ -152,15 +165,20 @@ export const createClassRules = [
     .trim()
     .notEmpty()
     .withMessage("Ngày bắt đầu không được để trống")
-    .isISO8601()
-    .withMessage("Ngày bắt đầu không đúng định dạng"),
+    .bail()
+    .isDate(DATE_FORMAT)
+    .withMessage("Ngày bắt đầu phải là ngày hợp lệ dạng YYYY-MM-DD"),
 
   body("endDate")
     .trim()
     .notEmpty()
     .withMessage("Ngày kết thúc không được để trống")
-    .isISO8601()
-    .withMessage("Ngày kết thúc không đúng định dạng"),
+    .bail()
+    .isDate(DATE_FORMAT)
+    .withMessage("Ngày kết thúc phải là ngày hợp lệ dạng YYYY-MM-DD")
+    .bail()
+    .custom(isNotBeforeStartDate)
+    .withMessage("Ngày kết thúc không được trước ngày bắt đầu"),
 
   body("mentorId")
     .optional()
@@ -181,12 +199,17 @@ export const updateClassRules = [
     .withMessage("Mô tả không được vượt quá 500 ký tự"),
   body("startDate")
     .optional()
-    .isISO8601()
-    .withMessage("Ngày bắt đầu không đúng định dạng"),
+    .trim()
+    .isDate(DATE_FORMAT)
+    .withMessage("Ngày bắt đầu phải là ngày hợp lệ dạng YYYY-MM-DD"),
   body("endDate")
     .optional()
-    .isISO8601()
-    .withMessage("Ngày kết thúc không đúng định dạng"),
+    .trim()
+    .isDate(DATE_FORMAT)
+    .withMessage("Ngày kết thúc phải là ngày hợp lệ dạng YYYY-MM-DD")
+    .bail()
+    .custom(isNotBeforeStartDate)
+    .withMessage("Ngày kết thúc không được trước ngày bắt đầu"),
   body("mentorId")
     .optional()
     .isInt({ min: 1 })

@@ -1,4 +1,5 @@
 import pool from "../config/db.config.js";
+import { BadRequestError } from "../core/error.response.js";
 
 const PUBLIC_COLUMNS = "id, name, email, age, created_at, updated_at";
 
@@ -6,13 +7,13 @@ export const findAll = async ({ sortBy = "id", order = "ASC" }) => {
   const validSortColumns = ["id", "name", "email"];
 
   if (!validSortColumns.includes(sortBy)) {
-    throw new Error(`Invalid sort column: ${sortBy}`);
+    throw new BadRequestError(`Invalid sort column: ${sortBy}`);
   }
 
   const validOder = ["asc", "desc"];
 
-  if (!validOder.includes(order.toLowerCase())) {
-    throw new Error(`Invalid sort order: ${order}`);
+  if (!validOder.includes(String(order).toLowerCase())) {
+    throw new BadRequestError(`Invalid sort order: ${order}`);
   }
 
   const result = await pool.query(
