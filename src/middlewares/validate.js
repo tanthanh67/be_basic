@@ -338,3 +338,40 @@ export const updateAssignmentRules = [
     .withMessage("Điểm tối đa phải lớn hơn 0 và không quá 10")
     .toFloat(),
 ];
+
+export const submitAssignmentRules = [
+  body("content")
+    .optional()
+    .isString()
+    .withMessage("Nội dung phải là chuỗi")
+    .trim(),
+
+  body("repositoryUrl")
+    .optional()
+    .trim()
+    .isURL({ protocols: ["http", "https"], require_protocol: true })
+    .withMessage("Link repository phải là URL hợp lệ (http hoặc https)")
+    .bail()
+    .isLength({ max: 2048 })
+    .withMessage("Link repository không được vượt quá 2048 ký tự"),
+
+  body()
+    .custom((value) => Boolean(value?.content || value?.repositoryUrl))
+    .withMessage("Cần có nội dung hoặc link repository"),
+];
+
+export const reviewSubmissionRules = [
+  body("score")
+    .notEmpty()
+    .withMessage("Điểm không được để trống")
+    .bail()
+    .isFloat({ min: 0, max: 10 })
+    .withMessage("Điểm phải từ 0 đến 10")
+    .toFloat(),
+
+  body("feedback")
+    .optional()
+    .isString()
+    .withMessage("Nhận xét phải là chuỗi")
+    .trim(),
+];
