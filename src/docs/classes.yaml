@@ -1,0 +1,84 @@
+paths:
+  /classes:
+    get:
+      tags: [Classes]
+      operationId: getAllClasses
+      summary: Lấy danh sách lớp học
+      description: 'Quyền: CLASS_READ_ALL hoặc CLASS_READ_OWN. CLASS_READ_ALL xem tất cả; nếu không có quyền này, chỉ trả về các lớp đang làm mentor hoặc thành viên. Chưa có phân trang.'
+      parameters:
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [id, name, description, start_date, end_date, mentor_id]
+            default: id
+        - { $ref: '#/components/parameters/SortOrder' }
+      responses:
+        '200': { $ref: '#/components/responses/ClassList' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    post:
+      tags: [Classes]
+      operationId: createClass
+      summary: Tạo lớp học
+      description: 'Quyền: CLASS_CREATE. Tên lớp duy nhất; endDate không được trước startDate. Nếu gửi mentorId, người dùng đó phải tồn tại.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateClassRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/ClassCreated' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+  /classes/{id}:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+    get:
+      tags: [Classes]
+      operationId: getClassById
+      summary: Lấy lớp học theo ID
+      description: 'Quyền: CLASS_READ_ALL hoặc CLASS_READ_OWN. Cần là mentor, thành viên của lớp hoặc có CLASS_READ_ALL.'
+      responses:
+        '200': { $ref: '#/components/responses/Class' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    put:
+      tags: [Classes]
+      operationId: updateClass
+      summary: Cập nhật lớp học
+      description: 'Quyền: CLASS_UPDATE. Chỉ gửi các trường muốn thay đổi. Ngày bắt đầu/kết thúc được đối chiếu với dữ liệu hiện tại; nếu gửi mentorId thì người dùng đó phải tồn tại.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateClassRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Class' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    delete:
+      tags: [Classes]
+      operationId: deleteClass
+      summary: Xóa lớp học
+      description: 'Quyền: CLASS_DELETE. Trả về thông tin lớp đã xóa.'
+      responses:
+        '200': { $ref: '#/components/responses/Class' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }

@@ -1,0 +1,50 @@
+paths:
+  /classes/{id}/members:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+    get:
+      tags: [Class Members]
+      operationId: getClassMembers
+      summary: Lấy thành viên của lớp
+      description: 'Quyền: CLASS_MEMBER_READ. id trong đường dẫn là ID lớp.'
+      responses:
+        '200': { $ref: '#/components/responses/ClassMemberList' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    post:
+      tags: [Class Members]
+      operationId: addClassMember
+      summary: Thêm thành viên vào lớp
+      description: 'Quyền: CLASS_MEMBER_ADD. Người dùng phải có vai trò MEMBER và chưa có trong lớp.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddClassMemberRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/MembershipCreated' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+  /classes/{id}/members/{memberId}:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+      - { $ref: '#/components/parameters/MemberId' }
+    delete:
+      tags: [Class Members]
+      operationId: removeClassMember
+      summary: Xóa thành viên khỏi lớp
+      description: 'Quyền: CLASS_MEMBER_REMOVE. id là ID lớp; memberId là ID người dùng. Trả về bản ghi thành viên đã xóa.'
+      responses:
+        '200': { $ref: '#/components/responses/Membership' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }

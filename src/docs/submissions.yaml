@@ -1,0 +1,69 @@
+paths:
+  /assignments/{id}/submissions:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+    post:
+      tags: [Submissions]
+      operationId: submitAssignment
+      summary: Nộp bài tập
+      description: 'Quyền: SUBMISSION_CREATE và phải là thành viên của lớp. id là ID bài tập. Cần content hoặc repositoryUrl không rỗng; chỉ được nộp một lần và phải trước deadline.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SubmitAssignmentRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/SubmissionCreated' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    get:
+      tags: [Submissions]
+      operationId: getSubmissionsByAssignment
+      summary: Lấy danh sách bài nộp của bài tập
+      description: 'Quyền: SUBMISSION_READ_CLASS hoặc SUBMISSION_READ_OWN. Mentor của lớp hoặc người có CLASS_READ_ALL xem mọi bài nộp; thành viên chỉ nhận bài của mình trong mảng, hoặc mảng rỗng nếu chưa nộp.'
+      responses:
+        '200': { $ref: '#/components/responses/SubmissionList' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+  /submissions/{id}:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+    get:
+      tags: [Submissions]
+      operationId: getSubmissionById
+      summary: Lấy bài nộp theo ID
+      description: 'Quyền: SUBMISSION_READ_CLASS hoặc SUBMISSION_READ_OWN. Cần là chủ bài nộp, mentor của lớp hoặc có CLASS_READ_ALL.'
+      responses:
+        '200': { $ref: '#/components/responses/Submission' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+  /submissions/{id}/review:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+    patch:
+      tags: [Submissions]
+      operationId: reviewSubmission
+      summary: Chấm điểm và nhận xét bài nộp
+      description: 'Quyền: SUBMISSION_REVIEW và phải là mentor của lớp. score từ 0 đến 10, không vượt quá maximum_score của bài tập.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReviewSubmissionRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Submission' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }

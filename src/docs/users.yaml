@@ -1,0 +1,80 @@
+paths:
+  /users:
+    get:
+      tags: [Users]
+      operationId: getAllUsers
+      summary: Lấy danh sách người dùng
+      description: 'Quyền: USER_READ. Trả về toàn bộ danh sách, chưa có phân trang.'
+      parameters:
+        - name: sortBy
+          in: query
+          schema: { type: string, enum: [id, name, email], default: id }
+        - { $ref: '#/components/parameters/SortOrder' }
+      responses:
+        '200': { $ref: '#/components/responses/UserList' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    post:
+      tags: [Users]
+      operationId: createUser
+      summary: Tạo người dùng
+      description: 'Quyền: USER_CREATE. Người dùng mới được gán vai trò MEMBER. Mật khẩu ít nhất 8 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateUserRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/UserCreated' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+  /users/{id}:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+    get:
+      tags: [Users]
+      operationId: getUserById
+      summary: Lấy người dùng theo ID
+      description: 'Quyền: USER_READ.'
+      responses:
+        '200': { $ref: '#/components/responses/User' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    put:
+      tags: [Users]
+      operationId: updateUser
+      summary: Cập nhật người dùng
+      description: 'Quyền: USER_UPDATE. Chỉ cần gửi các trường muốn thay đổi.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateUserRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/User' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    delete:
+      tags: [Users]
+      operationId: deleteUser
+      summary: Xóa người dùng
+      description: 'Quyền: USER_DELETE. Trả về thông tin người dùng đã xóa.'
+      responses:
+        '200': { $ref: '#/components/responses/User' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
