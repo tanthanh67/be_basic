@@ -33,8 +33,7 @@ router.post(
 router.put(
   "/:id",
   requirePermission("CLASS_UPDATE"),
-  validate(idParamRules),
-  validate(updateClassRules),
+  validate([...idParamRules, ...updateClassRules]),
   classController.updateClass,
 );
 router.delete(
