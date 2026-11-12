@@ -1,0 +1,77 @@
+paths:
+  /classes/{id}/assignments:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+    get:
+      tags: [Assignments]
+      operationId: getAssignmentsByClass
+      summary: Lấy bài tập của lớp
+      description: 'Quyền: ASSIGNMENT_READ. Cần là mentor, thành viên hoặc có CLASS_READ_ALL. id là ID lớp. Sắp xếp theo deadline rồi ID.'
+      responses:
+        '200': { $ref: '#/components/responses/AssignmentList' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    post:
+      tags: [Assignments]
+      operationId: createAssignment
+      summary: Tạo bài tập cho lớp
+      description: 'Quyền: ASSIGNMENT_CREATE và phải là mentor của lớp. maximumScore phải lớn hơn 0 và không quá 10.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateAssignmentRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/AssignmentCreated' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+  /assignments/{id}:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+    get:
+      tags: [Assignments]
+      operationId: getAssignmentById
+      summary: Lấy bài tập theo ID
+      description: 'Quyền: ASSIGNMENT_READ. Cần là mentor, thành viên của lớp hoặc có CLASS_READ_ALL.'
+      responses:
+        '200': { $ref: '#/components/responses/Assignment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    patch:
+      tags: [Assignments]
+      operationId: updateAssignment
+      summary: Cập nhật bài tập
+      description: 'Quyền: ASSIGNMENT_UPDATE và phải là mentor của lớp. Chỉ gửi trường cần thay đổi. maximumScore không được thấp hơn điểm bài nộp đã chấm.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateAssignmentRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Assignment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    delete:
+      tags: [Assignments]
+      operationId: deleteAssignment
+      summary: Xóa bài tập
+      description: 'Quyền: ASSIGNMENT_DELETE và phải là mentor của lớp. Trả về bài tập đã xóa.'
+      responses:
+        '200': { $ref: '#/components/responses/Assignment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
