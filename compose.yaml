@@ -1,17 +1,8 @@
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Docker Compose reference guide at
-# https://docs.docker.com/go/compose-spec-reference/
-
-# Here the instructions define your application as a service called "server".
-# This service is built from the Dockerfile in the current directory.
-# You can add other services your application may depend on here, such as a
-# database or a cache. For examples, see the Awesome Compose repository:
-# https://github.com/docker/awesome-compose
-
 services:
   server:
     build:
       context: .
+    init: true
     restart: unless-stopped
     env_file: .env
     environment:
@@ -20,27 +11,38 @@ services:
       DB_PORT: 5432
       PORT: 3000
     ports:
-      - 3000:3000
+      - "${APP_PUBLISHED_PORT:-3000}:3000"
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api-docs.json').then(async (res) => { const spec = await res.json(); process.exit(res.ok && spec.openapi ? 0 : 1); }).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
 
   db:
     image: postgres:18
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER:?Set DB_USER in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      POSTGRES_DB: ${DB_NAME:?Set DB_NAME in .env}
     ports:
-      - 127.0.0.1:5433:5432
+      - "127.0.0.1:${DB_PUBLISHED_PORT:-5433}:5432"
     volumes:
       - db_data:/var/lib/postgresql
       - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
       timeout: 3s
+      start_period: 10s
       retries: 10
 
 volumes:
