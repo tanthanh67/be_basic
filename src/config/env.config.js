@@ -1,6 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+const cookieSecure = process.env.COOKIE_SECURE;
+if (cookieSecure !== undefined && !["true", "false"].includes(cookieSecure)) {
+  throw new Error("COOKIE_SECURE must be true or false");
+}
+
 export const config = {
   app: {
     port: process.env.PORT || 3000,
@@ -15,10 +20,15 @@ export const config = {
   },
   jwt: {
     secret: process.env.JWT_SECRET || "default_secret_key",
-    expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+    expiresIn: process.env.JWT_EXPIRES_IN || "15m",
     refreshSecret:
       process.env.JWT_REFRESH_SECRET || "default_refresh_secret_key",
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
+  },
+  cookie: {
+    secure: cookieSecure === undefined
+      ? process.env.NODE_ENV === "production"
+      : cookieSecure === "true",
   },
   r2: {
     accountId: process.env.R2_ACCOUNT_ID || "",

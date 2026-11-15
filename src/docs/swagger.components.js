@@ -91,13 +91,6 @@ const schemas = {
       password: { type: "string", format: "password", writeOnly: true, example: "Demo@12345" },
     },
   },
-  RefreshRequest: {
-    type: "object",
-    required: ["refreshToken"],
-    properties: {
-      refreshToken: { type: "string", minLength: 1, description: "data.refreshToken nhận được khi đăng nhập." },
-    },
-  },
   CreateUserRequest: {
     type: "object",
     required: ["name", "email", "password"],
@@ -126,7 +119,6 @@ const schemas = {
     properties: {
       user: ref("AuthUser"),
       accessToken: { type: "string", description: "JWT dùng với Authorization: Bearer <token>." },
-      refreshToken: { type: "string", description: "JWT dùng trong body của POST /auth/refresh." },
     },
   },
   AccessTokenData: { type: "object", properties: { accessToken: { type: "string" } } },
@@ -277,9 +269,25 @@ const error = (statusCode, description, message) => ({
 });
 
 export default {
-  securitySchemes: { bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" } },
+  securitySchemes: {
+    bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
+    refreshCookie: {
+      type: "apiKey",
+      in: "cookie",
+      name: "refresh",
+      description: "Cookie HttpOnly do POST /auth/login đặt. Trình duyệt tự gửi cookie; không nhập token vào ô Authorize của scheme này.",
+    },
+  },
   schemas,
   parameters: {
+    AuthRequestHeader: {
+      name: "X-Requested-With",
+      in: "header",
+      required: true,
+      description: "Header chống CSRF cho login, refresh và logout. Giữ giá trị mặc định khi dùng Swagger.",
+      schema: { type: "string", enum: ["XMLHttpRequest"], default: "XMLHttpRequest" },
+      example: "XMLHttpRequest",
+    },
     Id: { name: "id", in: "path", required: true, description: "ID của tài nguyên trong đường dẫn.", schema: id },
     MemberId: { name: "memberId", in: "path", required: true, description: "ID của thành viên.", schema: id },
     SortOrder: {
@@ -302,9 +310,21 @@ export default {
     AuthUser: success(ref("AuthUser")),
     Login: {
       ...success(ref("LoginData")),
-      headers: { "Set-Cookie": { description: "Cookie refresh có HttpOnly; API refresh vẫn nhận refreshToken từ JSON body.", schema: { type: "string" } } },
+      headers: { "Set-Cookie": { description: "Đặt cookie refresh với HttpOnly, SameSite=Lax, Path=/ và Expires khớp với refresh token. Secure tùy COOKIE_SECURE. JSON không chứa refresh token.", schema: { type: "string" } } },
     },
     AccessToken: success(ref("AccessTokenData")),
+    Logout: {
+      description: "Phiên đã được thu hồi hoặc không còn tồn tại. Access token đã cấp vẫn có hiệu lực đến khi hết hạn.",
+      headers: {
+        "Set-Cookie": { description: "Xóa cookie refresh tại path /.", schema: { type: "string" } },
+      },
+      content: {
+        "application/json": {
+          schema: ref("SuccessResponse"),
+          example: { statusCode: 200, message: "Logout successful", data: null },
+        },
+      },
+    },
     Class: success(ref("Class")),
     ClassCreated: success(ref("Class"), 201),
     ClassList: success(list("Class")),

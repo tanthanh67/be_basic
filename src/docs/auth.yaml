@@ -21,8 +21,10 @@ paths:
       tags: [Auth]
       operationId: login
       summary: Đăng nhập
-      description: Trả về thông tin người dùng, accessToken và refreshToken. Dùng accessToken trong Authorize để gọi các API được bảo vệ.
+      description: Tạo một phiên đăng nhập riêng trong database. JSON chỉ trả thông tin người dùng và accessToken; refresh token được đặt trong cookie refresh có HttpOnly, SameSite=Lax, thời hạn khớp với token. Dùng accessToken trong Authorize để gọi các API được bảo vệ. Swagger gửi header X-Requested-With theo giá trị mặc định; trình duyệt tự lưu cookie.
       security: []
+      parameters:
+        - $ref: '#/components/parameters/AuthRequestHeader'
       requestBody:
         required: true
         content:
@@ -32,6 +34,7 @@ paths:
         '200': { $ref: '#/components/responses/Login' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '500': { $ref: '#/components/responses/InternalServerError' }
   /auth/me:
     get:
@@ -49,15 +52,30 @@ paths:
       tags: [Auth]
       operationId: refreshToken
       summary: Làm mới access token
-      description: Gửi refreshToken từ lần đăng nhập trong JSON body. Không sử dụng cookie để đọc refresh token và không cần access token.
-      security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/RefreshRequest' }
+      description: Đọc refresh token từ cookie refresh do trình duyệt tự gửi sau login. Không nhận refreshToken trong body và không cần access token. Phiên phải tồn tại, chưa hết hạn và chưa bị thu hồi. Access token mới giữ nguyên sessionId; refresh token không được thay mới. Cần header X-Requested-With. Trong Swagger, login trước trên cùng host rồi gọi API này, không nhập cookie trong Authorize.
+      security:
+        - refreshCookie: []
+      parameters:
+        - $ref: '#/components/parameters/AuthRequestHeader'
       responses:
         '200': { $ref: '#/components/responses/AccessToken' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+  /auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logout
+      summary: Đăng xuất phiên hiện tại
+      description: Đọc cookie refresh, thu hồi đúng phiên trong database rồi xóa cookie. Không nhận refreshToken trong body và không cần access token. Cần header X-Requested-With; thiếu hoặc sai header trả 403 trước khi xử lý cookie. Gọi lại bằng cùng refresh token còn hạn vẫn trả 200 khi phiên đã bị thu hồi hoặc không còn tồn tại; sau khi trình duyệt xóa cookie, gọi lại sẽ trả 401. Phiên khác không bị ảnh hưởng. Access token đã cấp vẫn dùng được đến khi hết hạn; frontend cần xóa access token và thông tin user. Cookie thiếu, sai, hết hạn hoặc token không có sessionId trả 401. Lỗi database trả 500; controller vẫn gửi header xóa cookie kể cả khi trả 401 hoặc 500.
+      security:
+        - refreshCookie: []
+      parameters:
+        - $ref: '#/components/parameters/AuthRequestHeader'
+      responses:
+        '200': { $ref: '#/components/responses/Logout' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '500': { $ref: '#/components/responses/InternalServerError' }
