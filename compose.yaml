@@ -4,9 +4,12 @@ services:
       context: .
     init: true
     restart: unless-stopped
+    command: ["sh", "-c", "npm run db:setup && npm start"]
     env_file: .env
     environment:
       NODE_ENV: production
+      # Local Docker uses HTTP. Set COOKIE_SECURE=true in .env for HTTPS deployment.
+      COOKIE_SECURE: "${COOKIE_SECURE:-false}"
       DB_HOST: db
       DB_PORT: 5432
       PORT: 3000
@@ -37,7 +40,6 @@ services:
       - "127.0.0.1:${DB_PUBLISHED_PORT:-5433}:5432"
     volumes:
       - db_data:/var/lib/postgresql
-      - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s

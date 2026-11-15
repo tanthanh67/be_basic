@@ -10,7 +10,7 @@ const swaggerDefinition = {
     description: [
       "API quản lý người dùng, lớp học, bài học, bài tập và bài nộp.",
       "Đăng nhập tại POST /auth/login, sao chép data.accessToken rồi dán vào Authorize (chỉ nhập token).",
-      "Các API được bảo vệ cần JWT và quyền tương ứng. Đăng ký, đăng nhập và làm mới token là công khai.",
+      "Các API được bảo vệ cần JWT và quyền tương ứng. Refresh/logout dùng cookie HttpOnly do login đặt, không cần access token hay JSON body. Login/refresh/logout yêu cầu header X-Requested-With: XMLHttpRequest (đã có giá trị mặc định trong Swagger).",
       "Request JSON sử dụng camelCase; dữ liệu trả về từ cơ sở dữ liệu thường sử dụng snake_case.",
     ].join("\n\n"),
   },

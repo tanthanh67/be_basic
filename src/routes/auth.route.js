@@ -6,12 +6,14 @@ import {
   loginRules,
 } from "../middlewares/validate.js";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
+import { requireAuthHeader } from "../middlewares/csrf.middleware.js";
 
 const router = Router();
 
 router.post("/register", validate(registerRules), authController.register);
-router.post("/login", validate(loginRules), authController.login);
+router.post("/login", requireAuthHeader, validate(loginRules), authController.login);
 router.get("/me", authenticateToken, authController.getMe);
-router.post("/refresh", authController.refreshToken);
+router.post("/refresh", requireAuthHeader, authController.refreshToken);
+router.post("/logout", requireAuthHeader, authController.logout);
 
 export default router;

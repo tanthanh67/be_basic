@@ -1,16 +1,48 @@
+import { randomUUID } from "node:crypto";
 import {
   ConflictError,
   NotFoundError,
   UnauthorizedError,
 } from "../core/error.response.js";
 import * as userRepository from "../repository/user.repository.js";
+import * as authSessionRepository from "../repository/authSession.repository.js";
 import {
   generateRefreshToken,
   generateToken,
   verifyRefreshToken,
-  verifyToken,
 } from "../utils/jwt.helper.js";
 import { hashPassword, comparePassword } from "../utils/password.helper.js";
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const readRefreshPayload = (refreshToken) => {
+  if (typeof refreshToken !== "string" || !refreshToken.trim()) {
+    throw new UnauthorizedError("Refresh token is required");
+  }
+
+  let decoded;
+  try {
+    decoded = verifyRefreshToken(refreshToken);
+  } catch {
+    throw new UnauthorizedError("Invalid or expired refresh token");
+  }
+
+  const payload = decoded?.payload;
+  if (
+    decoded?.type !== "refresh" ||
+    !Number.isSafeInteger(decoded?.exp) ||
+    !Number.isSafeInteger(payload?.id) ||
+    payload.id <= 0 ||
+    payload.id > 2147483647 ||
+    typeof payload.sessionId !== "string" ||
+    !UUID_PATTERN.test(payload.sessionId)
+  ) {
+    throw new UnauthorizedError("Invalid refresh token");
+  }
+
+  return { id: payload.id, sessionId: payload.sessionId };
+};
 
 export const register = async ({ name, email, password, age }) => {
   const existingUser = await userRepository.findByEmail(email);
@@ -49,10 +81,19 @@ export const login = async ({ email, password }) => {
   const tokenPayload = {
     id: user.id,
     email: user.email,
+    sessionId: randomUUID(),
   };
 
   const accessToken = generateToken(tokenPayload);
   const refreshToken = generateRefreshToken(tokenPayload);
+
+  const { exp } = verifyRefreshToken(refreshToken);
+  const refreshTokenExpiresAt = new Date(exp * 1000);
+  await authSessionRepository.create({
+    id: tokenPayload.sessionId,
+    userId: user.id,
+    expiresAt: refreshTokenExpiresAt,
+  });
 
   return {
     user: {
@@ -65,6 +106,7 @@ export const login = async ({ email, password }) => {
     },
     accessToken,
     refreshToken,
+    refreshTokenExpiresAt,
   };
 };
 
@@ -80,33 +122,32 @@ export const getMe = async (userId) => {
 };
 
 export const refreshAccessToken = async (refreshToken) => {
-  if (!refreshToken) {
-    throw new UnauthorizedError("Refresh token is required");
+  const payload = readRefreshPayload(refreshToken);
+  const session = await authSessionRepository.findActive(
+    payload.sessionId,
+    payload.id,
+  );
+  if (!session) {
+    throw new UnauthorizedError("Session has expired or been revoked");
   }
 
-  try {
-    const decoded = verifyRefreshToken(refreshToken);
+  const user = await userRepository.findById(payload.id);
+  if (!user) {
+    throw new UnauthorizedError("User no longer exists");
+  }
 
-    if (decoded.type !== "refresh") {
-      throw new UnauthorizedError("Invalid refresh token");
-    }
-
-    const user = await userRepository.findById(decoded.payload.id);
-    if (!user) {
-      throw new NotFoundError("User not found");
-    }
-
-    const tokenPayload = {
+  return {
+    accessToken: generateToken({
       id: user.id,
       email: user.email,
-    };
+      sessionId: session.id,
+    }),
+  };
+};
 
-    const newAccessToken = generateToken(tokenPayload);
+export const logout = async (refreshToken) => {
+  const payload = readRefreshPayload(refreshToken);
 
-    return {
-      accessToken: newAccessToken,
-    };
-  } catch (error) {
-    throw new UnauthorizedError("Invalid refresh token");
-  }
+  // Repeated logout succeeds even when the session is already revoked or gone.
+  await authSessionRepository.revoke(payload.sessionId, payload.id);
 };

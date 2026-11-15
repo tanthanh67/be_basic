@@ -16,7 +16,11 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
     customSiteTitle: "Backend Basic API Docs",
-    swaggerOptions: { displayRequestDuration: true, validatorUrl: null },
+    swaggerOptions: {
+      displayRequestDuration: true,
+      validatorUrl: null,
+      withCredentials: true,
+    },
   }),
 );
 
